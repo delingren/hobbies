@@ -2,6 +2,7 @@
 
 const int pins = 32;
 
+// a value of 0 indicates that the pin is not considered a column (or row) or it's not connected
 int cols[pins] = {15, 2, 4, 0, 17, 5, 0, 19, 21, 0, 0, 13, 0, 0, 0, 0,
                   0,  0, 0, 0,  0,  0, 0,  0,  0,  0, 0, 0,  0, 0, 0, 0};
 int rows[pins] = {0,  0,  0, 16, 0,  0,  18, 0,  0, 22, 23, 0, 12, 14, 0, 26,
