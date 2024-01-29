@@ -35,7 +35,7 @@ Pin #: 1 2 3 5 6 8 9 12
 Rows:  
 ```
 Row #:  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14  
-Pin #:  4  7 10 11 13 14 16 17 18 20 21 22 23 24 15
+Pin #: 11  7 10  4 13 14 16 17 18 20 21 22 23 24 15
 ```
 
 In total, there are 23 pins used for the matrix. The rest of the pins are either not used or for the capslock indicator. I couldn't figure out the pins for the indicator despite having tried all the combinations using a multimeter. It might be broken.
@@ -43,10 +43,10 @@ In total, there are 23 pins used for the matrix. The rest of the pins are either
 ```
    |   0   |   1   |   2   |   3   |   4   |   5   |   6   |   7   |
 ---+-------+-------+-------+-------+-------+-------+-------+-------+
- 0 |       | RShft |       |       | LShft |       |       |       |
+ 0 | ESC   | Q     | 1     | A     | Z     | Tab   | `     | Caps  |
  1 |       |       |       | RCtrl |       | LCtrl |       |       |
  2 | F7    | W     | 2     | S     | X     | F6    | F5    | F8    |
- 3 | ESC   | Q     | 1     | A     | Z     | Tab   | ~     | Caps  |
+ 3 |       | RShft |       |       | LShft |       |       |       |
  4 | F4    | E     | 3     | D     | C     | F3    | F2    | F1    |
  5 | G     | R     | 4     | F     | V     | T     | 5     | B     |
  6 | H     | U     | 7     | J     | M     | Y     | 6     | N     |
