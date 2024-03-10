@@ -23,7 +23,6 @@ bool initialize() {
   sending = false;
   pull_high(clock_pin);
   pull_high(data_pin);
-
   
   if (digitalPinToInterrupt(clock_pin) != NOT_AN_INTERRUPT) {
     // External interrupt
@@ -38,17 +37,20 @@ bool initialize() {
   }
 
   sei();
-  startTransmit(0xFF);
+  start_transmit(0xFF);
+  delay(750);
   return true;
 }
 
 void enableDevice() {
-  startTransmit(0xF4);
+  start_transmit(0xF4);
 }
 
-void startTransmit(uint8_t data)
+void start_transmit(uint8_t data)
 {
-  while (sending) {}
+  while (sending) {
+    delay(4);
+  }
   
   uint8_t oldSREG = SREG;
   cli();
@@ -146,16 +148,42 @@ void setup() {
   delay(10);
 
   initialize();
-  delay(10);
 
-  enableDevice();
-  delay(10);
+  // start_transmit(0xE8);
+  // start_transmit(0x00);
+  // start_transmit(0xE8);
+  // start_transmit(0x00);
+  // start_transmit(0xE8);
+  // start_transmit(0x00);
+  // start_transmit(0xE8);
+  // start_transmit(0x01);
+  
+  // start_transmit(0xF3);
+  // start_transmit(0x14);
+
+  // start_transmit(0xF4);
+
+  // enableDevice();
+  // delay(10);
 }
 
 void loop() {
   initialize();
-  delay(100);
+  // delay(100);
 
-  enableDevice();
-  delay(2000);
+  // enableDevice();
+  // delay(2000);
+
+  start_transmit(0xE8);
+  start_transmit(0x00);
+  start_transmit(0xE8);
+  start_transmit(0x00);
+  start_transmit(0xE8);
+  start_transmit(0x00);
+  start_transmit(0xE8);
+  start_transmit(0x02);
+
+  start_transmit(0xE9);
+
+  delay(5000);
 }
