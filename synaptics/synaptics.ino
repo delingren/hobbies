@@ -7,12 +7,12 @@ int data_pin = 9;
 bool sending = false;
 uint8_t send_buffer;
 
-void pull_low(int pin) {
+void pull_low(uint8_t pin) {
   pinMode(pin, OUTPUT);
   digitalWrite(pin, LOW);
 }
 
-void pull_high(int pin) {
+void pull_high(uint8_t pin) {
   pinMode(pin, INPUT_PULLUP);
 }
 
