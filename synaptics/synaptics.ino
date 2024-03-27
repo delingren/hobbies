@@ -1,10 +1,9 @@
-/*
-This code is written for atmega32u4. It may work for other avr chips.
-*/
+// Sample code for interacting with a PS2 mouse from a mega32u4, using interrupt based read and write.
 
-int clock_pin = 8;
-// int clock_pin = 3;
+// On atmel mega32u4, clock_pin needs to be one of these: 0, 1, 2, 3, 7, otherwise, use pin change interrupt
+int clock_pin = 7;
 int data_pin = 9;
+
 bool sending = false;
 uint8_t send_buffer;
 
@@ -15,35 +14,20 @@ void pull_low(int pin) {
 
 void pull_high(int pin) {
   pinMode(pin, INPUT_PULLUP);
-  // digitalWrite(pin, HIGH);
 }
 
 bool initialize() {
-  cli();
   sending = false;
   pull_high(clock_pin);
   pull_high(data_pin);
   
-  if (digitalPinToInterrupt(clock_pin) != NOT_AN_INTERRUPT) {
-    // External interrupt
-    attachInterrupt(digitalPinToInterrupt(clock_pin), bit_received, FALLING);
-  } else if (digitalPinToPCICR(clock_pin) != 0) {
-    // Pin change interrupt
-    *(digitalPinToPCICR(clock_pin)) |= 1 << digitalPinToPCICRbit(clock_pin);
-    *(digitalPinToPCMSK(clock_pin)) |= 1 << digitalPinToPCMSKbit(clock_pin);
-  } else {
-    // clock pin is not an interrupt pin
-    return false;
-  }
-
-  sei();
+  attachInterrupt(digitalPinToInterrupt(clock_pin), bit_received, FALLING);
   start_transmit(0xFF);
-  delay(750);
-  return true;
-}
 
-void enableDevice() {
-  start_transmit(0xF4);
+  // 0xFA and 0xAA bytes are separated by up to 500 ms of calibration delay
+  // Plus the normal response time, 550 should be good enough.
+  delay(550);
+  return true;
 }
 
 void start_transmit(uint8_t data)
@@ -52,7 +36,6 @@ void start_transmit(uint8_t data)
     delay(4);
   }
   
-  uint8_t oldSREG = SREG;
   cli();
 
   sending = true;
@@ -60,7 +43,7 @@ void start_transmit(uint8_t data)
 
   // 1. Bring CLK low for 100 us.
   pull_low(clock_pin);
-  _delay_ms(100);
+  delayMicroseconds(100);
 
   // 2. Bring DATA low.
   pull_low(data_pin);
@@ -68,16 +51,11 @@ void start_transmit(uint8_t data)
   // 3. Release CLK
   pull_high(clock_pin);
 
-  SREG = oldSREG;
+  sei();
 }
 
 void byte_received (uint8_t data) {
   Serial.println(data, HEX);
-}
-
-// Pin change interrupt ISR
-ISR(PCINT0_vect) {
-  bit_received();
 }
 
 void bit_received() {
@@ -145,45 +123,11 @@ void bit_received() {
 
 void setup() {
   Serial.begin(115200);
-  delay(10);
-
-  initialize();
-
-  // start_transmit(0xE8);
-  // start_transmit(0x00);
-  // start_transmit(0xE8);
-  // start_transmit(0x00);
-  // start_transmit(0xE8);
-  // start_transmit(0x00);
-  // start_transmit(0xE8);
-  // start_transmit(0x01);
-  
-  // start_transmit(0xF3);
-  // start_transmit(0x14);
-
-  // start_transmit(0xF4);
-
-  // enableDevice();
-  // delay(10);
+  delay(1000);
 }
 
 void loop() {
+  Serial.println("Resetting the touchpad...");
   initialize();
-  // delay(100);
-
-  // enableDevice();
-  // delay(2000);
-
-  start_transmit(0xE8);
-  start_transmit(0x00);
-  start_transmit(0xE8);
-  start_transmit(0x00);
-  start_transmit(0xE8);
-  start_transmit(0x00);
-  start_transmit(0xE8);
-  start_transmit(0x02);
-
-  start_transmit(0xE9);
-
-  delay(5000);
+  delay(1000);
 }
