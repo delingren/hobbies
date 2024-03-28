@@ -12,7 +12,7 @@ Turn this touchpad into a mouse that supports:
 
 The first goal is very straight-forward. And here's the implementation with Arduino framework.
 
-Touchpad info
+## Touchpad info
 
 * Pulled from an HP Envy Sleekbook 6
 * Synaptics chip # T1320A
@@ -43,7 +43,7 @@ Can sleep: no
 Palm detect: yes
 ```
 
-Packet formats
+## Packet formats
 
 Relative mode (mouse compatible)
 ```
@@ -52,3 +52,21 @@ Relative mode (mouse compatible)
 (2)|               X               |
 (3)|               Y               |
 ```
+
+## MCU & note on the code
+
+I used atmel mega32u4. Any Leonardo clone should work. Other avr processors with native USB support should work too. I'm using [external interrupts](https://developerhelp.microchip.com/xwiki/bin/view/products/mcu-mpu/8-bit-avr/structure/extint/). So the clock pin needs to be one of these: 0, 1, 2, 3, 7 (D2, D3, D1, D0, E6, respectively). It's also possible to use pin chagne interrupts with slight changes to the code:
+
+```
+*(digitalPinToPCICR(clock_pin)) |= 1 << digitalPinToPCICRbit(clock_pin);
+*(digitalPinToPCMSK(clock_pin)) |= 1 << digitalPinToPCMSKbit(clock_pin);
+
+... 
+
+ISR(PCINT0_vect) {
+   ...
+}
+```
+
+## Final product:
+![Breadboard](IMG_0914.jpeg)

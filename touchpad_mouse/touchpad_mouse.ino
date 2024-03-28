@@ -18,7 +18,7 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// SOFTWARE./Users/deling/hobbies/touchpad_mouse/src/synaptics.cpp
 
 #include "src/synaptics.h"
 #include <HID.h>
@@ -126,7 +126,7 @@ void setup() {
   Serial.begin(115200);
   hid_init();
 
-  synaptics::begin(7, 9, byte_received);
+  synaptics::begin(0, 9, byte_received);
   synaptics::reset();
   synaptics::enable();
 }
