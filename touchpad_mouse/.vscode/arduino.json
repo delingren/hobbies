@@ -1,0 +1,5 @@
+{
+    "board": "arduino:avr:leonardo",
+    "port": "/dev/tty.usbmodem1412401",
+    "sketch": "synaptics.ino"
+}
