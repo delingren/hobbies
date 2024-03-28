@@ -1,3 +1,15 @@
+# Laptop Touchpad Project
+
+## Goal
+
+Turn this touchpad into a mouse that supports:
+* Regular mouse functionalities. I.e. cursor movements, left and right clicks.
+* Two-finger scrolling.
+* Optionally: two finder click as right click.
+* Optionally: tap as click.
+
+The first goal is very straight-forward. We just need a vanilla PS2 implementation. We could also use QMK's pointing device support.
+
 Touchpad info
 
 * Pulled from an HP Envy Sleekbook 6
