@@ -18,12 +18,13 @@ Turn this touchpad into a mouse that supports:
 * Synaptics chip # T1320A. I wasn't able to find any datasheet.
 * Physical pinout. With help from this [video](https://www.youtube.com/watch?v=XdznW0ZuzGo), I figured out the pinout:
 ![Pinout](IMG_0835.jpeg)
+* In particular, this is a [clickpad](https://wayland.freedesktop.org/libinput/doc/latest/clickpad-softbuttons.html). This means, unless in PS/2 mouse compatible mode, it does not report left or right button. Instead, it reports the only button as the up button.
 * I did a few programmatic queries and here are the results.
-* Query `0x00: 01 47 18`:  
+* Query `0x00`, result: `01 47 18`:  
 `Version 8.1`
-* Query `0x01: 20 87 40`:  
+* Query `0x01`, result: `20 87 40`:  
 `Model 0x0887`
-* Query `0x02: D0 01 23`:
+* Query `0x02` result: `D0 01 23`:
 ```
 Model sub number: 01
 Middle button: no
@@ -56,20 +57,6 @@ This is compatible with generic PS/2 mice. Each packet consists of 3 bytes.
 
 #### Absolute mode
 In order to take advantage of extended features of the touchpad, such as pressure value, multi-finger reporting, etc, we need to operate in the so called absolute mode. In this mode, each packet consists of 6 bytes.
-
-* Wmode = 0
-```
-   | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-(1)| 1 | 0 |Fin|N/A| 0 |Ges| R | L |
-(2)|     Y11-Y8    |     X11-X8    |
-(3)|             Z7-Z0             |
-(4)| 1 | 1 |Y12|X12| 0 |Ges| R | L |
-(5)|             X7-X0             |
-(6)|             Y7-Y0             |
-```
-
-Fin: virtual button click (tap)
-Ges: tap & slide gesture
 
 * Wmode = 1
 ```
