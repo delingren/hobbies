@@ -21,55 +21,55 @@
 // SOFTWARE.
 
 #include "src/synaptics.h"
-#include <HID.h>
+// #include <HID.h>
 // PS2 protocol: https://wiki.osdev.org/PS/2_Mouse
 
-void hid_init() {
-  static const uint8_t hidReportDescriptor[] PROGMEM = {
+// void hid_init() {
+//   static const uint8_t hidReportDescriptor[] PROGMEM = {
 
-      //  Mouse
-      0x05, 0x01, // USAGE_PAGE (Generic Desktop)  // 54
-      0x09, 0x02, // USAGE (Mouse)
-      0xa1, 0x01, // COLLECTION (Application)
-      0x09, 0x01, //   USAGE (Pointer)
-      0xa1, 0x00, //   COLLECTION (Physical)
-      0x85, 0x01, //     REPORT_ID (1)
-      0x05, 0x09, //     USAGE_PAGE (Button)
-      0x19, 0x01, //     USAGE_MINIMUM (Button 1)
-      0x29, 0x03, //     USAGE_MAXIMUM (Button 3)
-      0x15, 0x00, //     LOGICAL_MINIMUM (0)
-      0x25, 0x01, //     LOGICAL_MAXIMUM (1)
-      0x95, 0x03, //     REPORT_COUNT (3)
-      0x75, 0x01, //     REPORT_SIZE (1)
-      0x81, 0x02, //     INPUT (Data,Var,Abs)
-      0x95, 0x01, //     REPORT_COUNT (1)
-      0x75, 0x05, //     REPORT_SIZE (5)
-      0x81, 0x03, //     INPUT (Cnst,Var,Abs)
-      0x05, 0x01, //     USAGE_PAGE (Generic Desktop)
-      0x09, 0x30, //     USAGE (X)
-      0x09, 0x31, //     USAGE (Y)
-      0x09, 0x38, //     USAGE (Wheel)
-      0x15, 0x81, //     LOGICAL_MINIMUM (-127)
-      0x25, 0x7f, //     LOGICAL_MAXIMUM (127)
-      0x75, 0x08, //     REPORT_SIZE (8)
-      0x95, 0x03, //     REPORT_COUNT (3)
-      0x81, 0x06, //     INPUT (Data,Var,Rel)
-      0xc0,       //   END_COLLECTION
-      0xc0,       // END_COLLECTION
-  };
-  static HIDSubDescriptor node(hidReportDescriptor,
-                               sizeof(hidReportDescriptor));
-  HID().AppendDescriptor(&node);
-}
+//       //  Mouse
+//       0x05, 0x01, // USAGE_PAGE (Generic Desktop)  // 54
+//       0x09, 0x02, // USAGE (Mouse)
+//       0xa1, 0x01, // COLLECTION (Application)
+//       0x09, 0x01, //   USAGE (Pointer)
+//       0xa1, 0x00, //   COLLECTION (Physical)
+//       0x85, 0x01, //     REPORT_ID (1)
+//       0x05, 0x09, //     USAGE_PAGE (Button)
+//       0x19, 0x01, //     USAGE_MINIMUM (Button 1)
+//       0x29, 0x03, //     USAGE_MAXIMUM (Button 3)
+//       0x15, 0x00, //     LOGICAL_MINIMUM (0)
+//       0x25, 0x01, //     LOGICAL_MAXIMUM (1)
+//       0x95, 0x03, //     REPORT_COUNT (3)
+//       0x75, 0x01, //     REPORT_SIZE (1)
+//       0x81, 0x02, //     INPUT (Data,Var,Abs)
+//       0x95, 0x01, //     REPORT_COUNT (1)
+//       0x75, 0x05, //     REPORT_SIZE (5)
+//       0x81, 0x03, //     INPUT (Cnst,Var,Abs)
+//       0x05, 0x01, //     USAGE_PAGE (Generic Desktop)
+//       0x09, 0x30, //     USAGE (X)
+//       0x09, 0x31, //     USAGE (Y)
+//       0x09, 0x38, //     USAGE (Wheel)
+//       0x15, 0x81, //     LOGICAL_MINIMUM (-127)
+//       0x25, 0x7f, //     LOGICAL_MAXIMUM (127)
+//       0x75, 0x08, //     REPORT_SIZE (8)
+//       0x95, 0x03, //     REPORT_COUNT (3)
+//       0x81, 0x06, //     INPUT (Data,Var,Rel)
+//       0xc0,       //   END_COLLECTION
+//       0xc0,       // END_COLLECTION
+//   };
+//   static HIDSubDescriptor node(hidReportDescriptor,
+//                                sizeof(hidReportDescriptor));
+//   HID().AppendDescriptor(&node);
+// }
 
-void hid_report(uint8_t buttons, int8_t x, int8_t y) {
-  uint8_t m[4];
-  m[0] = buttons;
-  m[1] = x;
-  m[2] = y;
-  m[3] = 0; // wheel
-  HID().SendReport(1, m, sizeof(m));
-}
+// void hid_report(uint8_t buttons, int8_t x, int8_t y) {
+//   uint8_t m[4];
+//   m[0] = buttons;
+//   m[1] = x;
+//   m[2] = y;
+//   m[3] = 0; // wheel
+//   HID().SendReport(1, m, sizeof(m));
+// }
 
 int8_t to_hid_value(bool overflow, bool negative, uint8_t data) {
   // HID uses [-127, 127]. I.e. an 8-bit signed integer, except -128.
@@ -80,42 +80,40 @@ int8_t to_hid_value(bool overflow, bool negative, uint8_t data) {
                   : (0 <= ps2_value && ps2_value <= 127 ? ps2_value : 127);
 }
 
-uint32_t pending_packet;
-uint32_t has_pending_packet = false;
+volatile uint64_t pending_packet;
+volatile bool has_pending_packet = false;
 
-void packet_received(uint32_t data) {
+void packet_received(uint64_t data) {
   has_pending_packet = true;
   pending_packet = data;
 }
 
 void process_pending_packet() {
-  uint32_t data = pending_packet;
+  uint64_t data = pending_packet;
   has_pending_packet = false;
 
-  bool y_overflow = (data >> 7) & 0x01;
-  bool x_overflow = (data >> 6) & 0x01;
-  bool y_negative = (data >> 5) & 0x01;
-  bool x_negative = (data >> 4) & 0x01;
-  uint8_t y_value = (data >> 16) & 0xFF;
-  uint8_t x_value = (data >> 8) & 0xFF;
-  bool middle = (data >> 2) & 0x01;
+  uint16_t y =
+      (data >> 40) & 0x00FF | (data >> 4) & 0x0F00 | (data >> 17) & 0x1000;
+  uint16_t x =
+      (data >> 32) & 0x00FF | (data >> 0) & 0x0F00 | (data >> 16) & 0x1000;
+  uint8_t z = (data >> 16) & 0xFF;
+  uint8_t w = (data >> 26) & 0x01 | (data >> 2) & 0x06;
+
   bool right = (data >> 1) & 0x01;
-  bool left = data & 0x01;
+  bool left = (data >> 0) & 0x01;
 
-  int8_t x = to_hid_value(x_overflow, x_negative, x_value);
-  int8_t y = to_hid_value(y_overflow, y_negative, y_value);
-
-  hid_report(left | right << 1 | middle << 2, x, -y);
+  static char output[256];
+  sprintf(output, "x: %u, y: %u, z: %u, w: %02x", x, y, z, w);
+  Serial.println(output);
 }
 
 void byte_received(uint8_t data) {
-  // Relative mode. Each packet consists of 3 bytes. Let's use a 32 bit unsigned
-  // int.
-  static uint32_t buffer = 0;
+  // Serial.println(data, HEX);
+  static uint64_t buffer = 0;
   static int index = 0;
-  buffer |= ((uint32_t)data) << index;
+  buffer |= ((uint64_t)data) << index;
   index += 8;
-  if (index == 24) {
+  if (index == 48) {
     packet_received(buffer);
     index = 0;
     buffer = 0;
@@ -124,11 +122,14 @@ void byte_received(uint8_t data) {
 
 void setup() {
   Serial.begin(115200);
-  hid_init();
+  delay(3000);
+  // hid_init();
 
-  synaptics::begin(7, 9, byte_received);
+  synaptics::begin(0, 9, byte_received);
   synaptics::reset();
-  synaptics::enable();
+  // synaptics::enable();
+  // absolute, low rate, w=1
+  synaptics::set_mode(0x81);
 }
 
 void loop() {

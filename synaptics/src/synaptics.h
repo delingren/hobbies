@@ -29,4 +29,19 @@ void reset() { write_byte(0xFF, 3); }
 void enable() { write_byte(0xF4, 1); }
 
 void disable() { write_byte(0xF5, 1); }
+
+void set_mode(uint8_t mode) {
+  disable();
+  write_byte(0xE8);
+  write_byte((mode & 0xC0) >> 6);
+  write_byte(0xE8);
+  write_byte((mode & 0x30) >> 4);
+  write_byte(0xE8);
+  write_byte((mode & 0x0C) >> 2);
+  write_byte(0xE8);
+  write_byte((mode & 0x03) >> 0);
+  write_byte(0xF3);
+  write_byte(0x14);
+  enable();
+}
 } // namespace synaptics
